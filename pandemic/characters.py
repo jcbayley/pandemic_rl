@@ -3,13 +3,17 @@ from player import Player
 class Scientist(Player):
     
     def __init__(self,name, parent):
-        
+        """
+        modify existng player class to include extra abiities of characters
+        """
         self._parent = parent 
         
         self.name = name
         
     def discover_cure(self,color):
-        
+        """
+        Scientist only need 4 city cards to cure a disease
+        """
         if color in self._parent.cured:
             raise Exception("This disease is already cured")
         
@@ -22,6 +26,7 @@ class Scientist(Player):
                         ctys[nm] = cty
                         
             num_color = len(ctys)
+            # original player function had 5 here, but has been chagnged to only need 4 cards
             if num_color >= 4:
                 self._parent.cured.append(color)
                 card_count = 0

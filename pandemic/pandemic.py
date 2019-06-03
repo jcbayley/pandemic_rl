@@ -7,13 +7,17 @@ from city import City
 
 class Pandemic:
     
-    def __init__(self):
-        
+    def __init__(self, num_players = 3, city_filename = "../data/connections.ini"):
+        """
+        Set up the pandemic game
+        """
         self.cities = {}
         self.connections = []
         
-        self.read_cities()
-        
+        self.read_cities(city_filename)
+        self.create_graph()
+
+
         self.infection_rate_ind = 0
         self.infection_rate = 2
         self.outbreaks = 0
@@ -43,29 +47,42 @@ class Pandemic:
         if not city.name in self.cities.keys():
             self.cities[city.name] = city
 
-    def outbreak(self):
-        
+    def epidemic(self):
+        """
+        if there is an epidemic, increase the infection rate
+        """
         infection_rates = [2,2,2,3,3,4,4]
-        
+
         self.infection_rate_ind += 1
         self.infection_rate = infection_rates[self.infection_rate_ind]
-        
+
+    def outbreak(self):
+        """
+        if there is an outbreak increase the outbreaks counter by 1
+        """
         self.outbreaks += 1
         
     def lose(self,msg):
-    
+        """
+        function to be called in any of the lose conditions are satisfied
+        """
         print("You have lost the game because: {}".format(msg))
         
         return 0
         
     def read_cities(self,filepath = "../data/connections.ini"):
-        
+        """
+        read the config file containing all the cities and their connections
+        """
         cp = configparser.ConfigParser()
         cp.read(filepath)
         
+        #loop over the connections and add the cities to a dictionary
         for key,vals in cp.items():
+            # create a city object
             temp_city = City(self)
             temp_city.name = key
+            # loop over the paramters of a city, i.e. its color and its connections
             for val in vals:
                 ent = cp.get(key,val)
                 if val == "connections":
@@ -75,7 +92,10 @@ class Pandemic:
             del temp_city
             
     def create_graph(self):
-        
+        """
+        create a networkx graph of all the cities and their connections, 
+
+        """
         self.board = nx.MultiGraph()
         
         connections = []
@@ -98,9 +118,11 @@ class Pandemic:
         """
         nodes = self.board.nodes()
         labels = {n:n for n in nodes}
+        colors = [nodes[cty]["data"].color for cty in nodes]
         fig, ax = plt.subplots(figsize = figsize)
         pos = nx.spring_layout(self.board)
-        ex = nx.draw_networkx_edges(self.board, pos, alpha = 0.2)
-        nc = nx.draw_networkx_nodes(self.board, pos, nodelist=nodes, node_size=300)
-        lc = nx.draw_networkx_labels(self.board, pos, labels)
+        nx.draw(self.board,node_color = colors,with_labels = True)
+        #ex = nx.draw_networkx_edges(self.board, pos, alpha = 0.2)
+        #nc = nx.draw_networkx_nodes(self.board, pos, nodelist=nodes, node_size=300, node_color = colors)
+        #lc = nx.draw_networkx_labels(self.board, pos, labels)
         ax.axis('off')
