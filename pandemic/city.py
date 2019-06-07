@@ -15,6 +15,7 @@ class City:
         self.name = None
         self.color = None
         self.type = "city"
+        self.coordinates = (0,0) 
         
         self._parent = parent
         

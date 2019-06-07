@@ -79,12 +79,17 @@ class Pandemic:
         
         #loop over the connections and add the cities to a dictionary
         for key,vals in cp.items():
+            
             # create a city object
             temp_city = City(self)
             temp_city.name = key
+            
             # loop over the paramters of a city, i.e. its color and its connections
             for val in vals:
                 ent = cp.get(key,val)
+                if val == "coordinates":
+                    #convert the string to a tuple
+                    temp_city.coordinates = (int(ent.split(',')[0]),int(ent.split(',')[1]))
                 if val == "connections":
                     ent = [i.strip(" ") for i in ent.strip("[]").strip("]").split(",")]
                 setattr(temp_city,val,ent)
@@ -101,8 +106,10 @@ class Pandemic:
         connections = []
         
         for city in self.cities.values():
-            
-            self.board.add_node(city.name, data = city)
+            #not sure why but city.coordinates is a string for some reason.
+            location = (int(city.coordinates.split(',')[0]),int(city.coordinates.split(',')[1]))
+
+            self.board.add_node(city.name, pos = location, data = city)
             
             for con in city.connections:
                 if (city.name,con) in connections or (con,city.name) in connections:
@@ -117,12 +124,16 @@ class Pandemic:
         pot the model using networkx
         """
         nodes = self.board.nodes()
+        
         labels = {n:n for n in nodes}
         colors = [nodes[cty]["data"].color for cty in nodes]
         fig, ax = plt.subplots(figsize = figsize)
-        pos = nx.spring_layout(self.board)
-        nx.draw(self.board,node_color = colors,with_labels = True)
+        #pos = nx.spring_layout(self.board)
+        pos = nx.get_node_attributes(self.board,'pos')
+        #print(pos)
+        nx.draw(self.board,pos,node_color = colors,with_labels = True)
         #ex = nx.draw_networkx_edges(self.board, pos, alpha = 0.2)
         #nc = nx.draw_networkx_nodes(self.board, pos, nodelist=nodes, node_size=300, node_color = colors)
         #lc = nx.draw_networkx_labels(self.board, pos, labels)
         ax.axis('off')
+        plt.show()
